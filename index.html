@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultima Hub | 2026 Dashboard</title>
+    <style>
+        /* 1. DESIGN SYSTEM - 2026 DARK AESTHETIC */
+        :root {
+            --bg: #050505;
+            --card: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #00ffcc;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: minmax(180px, auto);
+            gap: 20px;
+        }
+
+        /* 2. TRENDING BENTO TILE STYLES */
+        .tile {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tile:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+
+        /* Layout Variations */
+        .large { grid-column: span 2; }
+        .tall { grid-row: span 2; }
+        .full { grid-column: span 3; }
+
+        /* 3. COMPONENT STYLING */
+        h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin: 0 0 20px 0; }
+        
+        /* Clock */
+        .time-display { font-size: 4rem; font-weight: 800; letter-spacing: -3px; }
+        .date-display { color: var(--text-secondary); margin-top: -10px; }
+
+        /* Task Manager */
+        .todo-input-wrapper { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            color: white;
+            outline: none;
+        }
+        .add-btn {
+            background: var(--accent);
+            color: black;
+            border: none;
+            padding: 0 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .task-list { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .delete-task { color: #ff4444; cursor: pointer; background: none; border: none; }
+
+        /* Project Cards */
+        .project-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .p-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .p-card:hover { background: var(--accent); color: black; }
+
+        /* Status Indicator */
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            box-shadow: 0 0 10px var(--accent);
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); opacity: 1; }
+            70% { transform: scale(1.1); opacity: 0.5; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="tile large">
+        <h2>System Time</h2>
+        <div class="time-display" id="clock">00:00:00</div>
+        <div class="date-display" id="date">Monday, March 9, 2026</div>
+    </div>
+
+    <div class="tile">
+        <h2>Network Status</h2>
+        <div style="font-size: 1.5rem; font-weight: bold;">
+            <span class="pulse"></span> LIVE
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.8rem;">Karachi Node Active</p>
+    </div>
+
+    <div class="tile tall">
+        <h2>Daily Objectives</h2>
+        <div class="todo-input-wrapper">
+            <input type="text" id="todo-input" placeholder="New objective...">
+            <button class="add-btn" onclick="addTask()">+</button>
+        </div>
+        <ul class="task-list" id="task-list">
+            </ul>
+    </div>
+
+    <div class="tile large">
+        <h2>Project Portfolio</h2>
+        <div class="project-grid">
+            <a href="#" class="p-card">
+                <strong>Vanguard UI</strong>
+                <p style="font-size: 0.7rem; margin: 5px 0 0;">Visual Identity</p>
+            </a>
+            <a href="#" class="p-card">
+                <strong>Aether Pro</strong>
+                <p style="font-size: 0.7rem; margin: 5px 0 0;">SaaS Architecture</p>
+            </a>
+        </div>
+    </div>
+
+    <div class="tile">
+        <h2>Weekly Focus</h2>
+        <p style="font-size: 1.1rem;">High-End Frontend Development</p>
+    </div>
+</div>
+
+<script>
+    /* 4. LOGIC - MAKING IT FUNCTIONAL */
+
+    // LIVE CLOCK LOGIC
+    function updateClock() {
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        
+        document.getElementById('clock').textContent = now.toLocaleTimeString();
+        document.getElementById('date').textContent = now.toLocaleDateString(undefined, options);
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // TO-DO LIST LOGIC (WITH LOCAL STORAGE)
+    const taskInput = document.getElementById('todo-input');
+    const taskList = document.getElementById('task-list');
+
+    // Load tasks from storage on startup
+    document.addEventListener('DOMContentLoaded', getTasks);
+
+    function addTask() {
+        if (taskInput.value === '') return;
+
+        createTaskElement(taskInput.value);
+        saveLocalTasks(taskInput.value);
+        taskInput.value = '';
+    }
+
+    function createTaskElement(text) {
+        const li = document.createElement('li');
+        li.classList.add('task-item');
+        li.innerHTML = `
+            <span>${text}</span>
+            <button class="delete-task" onclick="removeTask(this)">✕</button>
+        `;
+        taskList.appendChild(li);
+    }
+
+    function removeTask(btn) {
+        const item = btn.parentElement;
+        const text = item.querySelector('span').innerText;
+        item.remove();
+        removeLocalTask(text);
+    }
+
+    // LOCAL STORAGE SYNC
+    function saveLocalTasks(task) {
+        let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
+        tasks.push(task);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function getTasks() {
+        let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
+        tasks.forEach(task => createTaskElement(task));
+    }
+
+    function removeLocalTask(task) {
+        let tasks = JSON.parse(localStorage.getItem('tasks'));
+        const filteredTasks = tasks.filter(t => t !== task);
+        localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+    }
+
+    // Handle Enter key for input
+    taskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTask();
+    });
+</script>
+
+</body>
+</html>
